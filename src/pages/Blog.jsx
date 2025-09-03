@@ -13,7 +13,7 @@ const DiaryBlog = () => {
 
   // Create dates from June 23 to July 21 (28 days total)
   const startDate = new Date(2025, 5, 23); // June is month 5 in JavaScript
-  const totalDays = 28;
+  const totalDays = 29;
 
   // Days to skip: 25, 2, 9, 16
   const skippedDays = [26, 3, 10, 17];
