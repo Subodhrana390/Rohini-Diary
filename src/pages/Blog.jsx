@@ -16,7 +16,7 @@ const DiaryBlog = () => {
   const totalDays = 28;
 
   // Days to skip: 25, 2, 9, 16
-  const skippedDays = [25, 2, 9, 16];
+  const skippedDays = [26, 3, 10, 17];
 
   const days = Array.from({ length: totalDays }, (_, i) => {
     const dayNumber = i + 1;
