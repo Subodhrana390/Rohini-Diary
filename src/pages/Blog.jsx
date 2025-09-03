@@ -11,21 +11,27 @@ const DiaryBlog = () => {
   const [filteredDays, setFilteredDays] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Create dates from June 23 to July 21 (28 days total)
-  const startDate = new Date(2025, 5, 23); // June is month 5 in JavaScript
-  const totalDays = 29;
+  const totalDays = 28;
+  const startDate = new Date(2025, 5, 23);
 
-  // Days to skip: 25, 2, 9, 16
-  const skippedDays = [26, 3, 10, 17];
-
+  let validDayCounter = 0;
   const days = Array.from({ length: totalDays }, (_, i) => {
-    const dayNumber = i + 1;
-
-    // Skip the specified days
-    if (skippedDays.includes(dayNumber)) return null;
-
     const currentDate = new Date(startDate);
     currentDate.setDate(startDate.getDate() + i);
+
+    const isSunday = currentDate.getDay() === 0;
+
+    if (isSunday) {
+      return {
+        id: null,
+        title: "No Training",
+        date: currentDate.toDateString(),
+        fullDate: currentDate,
+        isSkipped: true,
+      };
+    }
+
+    validDayCounter++;
 
     const monthNames = [
       "January",
@@ -47,22 +53,29 @@ const DiaryBlog = () => {
     const year = currentDate.getFullYear();
 
     return {
-      id: dayNumber,
-      title: `Day ${dayNumber}`,
+      id: validDayCounter,
+      title: `Day ${validDayCounter}`,
       date: `${month} ${day}, ${year}`,
-      pdfUrl: `/daily_blogs/Day_${dayNumber}.pdf`,
-      excerpt: `This is a summary of activities and learnings from Day ${dayNumber} of my training...`,
+      pdfUrl: `/daily_blogs/Day_${validDayCounter}.pdf`,
+      excerpt: `This is a summary of activities and learnings from Day ${validDayCounter} of my training...`,
       tags: ["React", "Next.js", "AI", "Training"],
       fullDate: currentDate,
+      isSkipped: false,
     };
-  }).filter((day) => day !== null); // Remove skipped days
+  });
+
+  // Training days only (exclude skipped)
+  const trainingDays = days.filter((d) => !d.isSkipped);
+
+  // Skipped days (for note)
+  const skippedDays = days.filter((d) => d.isSkipped).map((d) => d.fullDate);
 
   // Filter days based on search term
   useEffect(() => {
     if (searchTerm === "") {
-      setFilteredDays(days);
+      setFilteredDays(trainingDays);
     } else {
-      const filtered = days.filter(
+      const filtered = trainingDays.filter(
         (day) =>
           day.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           day.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,10 +88,10 @@ const DiaryBlog = () => {
   }, [searchTerm]);
 
   const handleDayClick = (day) => {
+    if (day.isSkipped) return;
     setIsLoading(true);
     setSelectedDay(day);
 
-    // Simulate loading delay for better UX
     setTimeout(() => {
       setIsModalOpen(true);
       setIsLoading(false);
@@ -93,21 +106,17 @@ const DiaryBlog = () => {
   const navigateDay = (direction) => {
     if (!selectedDay) return;
 
-    const currentIndex = days.findIndex((day) => day.id === selectedDay.id);
-    let newIndex;
+    const currentIndex = trainingDays.findIndex(
+      (day) => day.id === selectedDay.id
+    );
+    let newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
 
-    if (direction === "prev") {
-      newIndex = currentIndex - 1;
-      if (newIndex < 0) newIndex = days.length - 1;
-    } else {
-      newIndex = currentIndex + 1;
-      if (newIndex >= days.length) newIndex = 0;
-    }
+    if (newIndex < 0) newIndex = trainingDays.length - 1;
+    if (newIndex >= trainingDays.length) newIndex = 0;
 
-    setSelectedDay(days[newIndex]);
+    setSelectedDay(trainingDays[newIndex]);
   };
 
-  // PDF plugin
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   return (
@@ -125,21 +134,32 @@ const DiaryBlog = () => {
             </span>
           </p>
 
-          {/* Note about skipped days */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-2xl mx-auto mb-6">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <i className="fas fa-info-circle text-yellow-500 mt-1 mr-3"></i>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-yellow-800">Note</h4>
-                <p className="text-sm text-yellow-700 mt-1">
-                  Days 2, 9, 16, and 25 are not included as there were no
-                  training sessions on these days.
-                </p>
+          {/* Dynamic Note */}
+          {skippedDays.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-2xl mx-auto mb-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <i className="fas fa-info-circle text-yellow-500 mt-1 mr-3"></i>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-yellow-800">Note</h4>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    No training sessions on:{" "}
+                    {skippedDays
+                      .map((d) =>
+                        d.toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      )
+                      .join(", ")}
+                    .
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Search Bar */}
           <div className="max-w-md mx-auto relative">
@@ -155,7 +175,6 @@ const DiaryBlog = () => {
             </div>
           </div>
 
-          {/* Results count */}
           {searchTerm && (
             <div className="mt-4 text-sm text-gray-600">
               Found {filteredDays.length} day
@@ -164,7 +183,7 @@ const DiaryBlog = () => {
           )}
         </header>
 
-        {/* Calendar Navigation */}
+        {/* Calendar */}
         <div className="mb-8 bg-white rounded-xl p-4 shadow-sm">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-800">
@@ -181,58 +200,26 @@ const DiaryBlog = () => {
             </div>
           </div>
           <div className="mt-4 grid grid-cols-7 gap-2 text-center">
-            {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+            {days.map((dayObj, index) => (
               <div
                 key={index}
-                className="text-xs font-semibold text-gray-500 py-1"
+                className={`relative h-8 flex items-center justify-center rounded-full text-sm
+                  ${
+                    dayObj.isSkipped
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed line-through"
+                      : dayObj.fullDate.getDay() === 6
+                      ? "bg-gray-100 text-gray-600 cursor-pointer"
+                      : "bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer"
+                  }`}
+                onClick={() => handleDayClick(dayObj)}
+                title={dayObj.isSkipped ? "No training session" : dayObj.title}
               >
-                {day}
+                {dayObj.fullDate.getDate()}
+                {dayObj.isSkipped && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full"></span>
+                )}
               </div>
             ))}
-            {/* Empty days before June 23 */}
-            {Array.from({ length: 4 }, (_, i) => (
-              <div key={`empty-${i}`} className="h-8"></div>
-            ))}
-            {/* Days from June 23 to July 21 */}
-            {Array.from({ length: totalDays }, (_, i) => {
-              const dayNumber = i + 1;
-              const currentDate = new Date(startDate);
-              currentDate.setDate(startDate.getDate() + i);
-
-              // Check if this day should be skipped
-              const isSkipped = skippedDays.includes(dayNumber);
-
-              return (
-                <div
-                  key={dayNumber}
-                  className={`h-8 flex items-center justify-center rounded-full text-sm
-                    ${
-                      isSkipped
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed line-through"
-                        : currentDate.getDay() === 0 ||
-                          currentDate.getDay() === 6
-                        ? "bg-gray-100 text-gray-600 cursor-pointer"
-                        : "bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer"
-                    }`}
-                  onClick={
-                    isSkipped
-                      ? undefined
-                      : () =>
-                          handleDayClick(days.find((d) => d.id === dayNumber))
-                  }
-                  title={
-                    isSkipped
-                      ? `Day ${dayNumber} - No session`
-                      : `Day ${dayNumber}`
-                  }
-                >
-                  {currentDate.getDate()}
-                  {isSkipped && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full"></span>
-                  )}
-                </div>
-              );
-            })}
           </div>
           <div className="mt-4 flex items-center justify-center text-xs text-gray-500">
             <span className="w-3 h-3 bg-red-400 rounded-full mr-1"></span>
@@ -240,7 +227,7 @@ const DiaryBlog = () => {
           </div>
         </div>
 
-        {/* Days Grid */}
+        {/* Training Days Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredDays.map((day) => (
             <div
@@ -290,7 +277,7 @@ const DiaryBlog = () => {
           ))}
         </div>
 
-        {/* No results message */}
+        {/* No results */}
         {filteredDays.length === 0 && searchTerm && (
           <div className="text-center py-12">
             <div className="text-5xl text-gray-300 mb-4">
@@ -374,7 +361,7 @@ const DiaryBlog = () => {
                   <button
                     onClick={() => navigateDay("prev")}
                     className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 flex items-center"
-                    disabled={selectedDay.id === 1}
+                    disabled={selectedDay.id === trainingDays[0].id}
                   >
                     <i className="fas fa-chevron-left mr-1 text-xs"></i>{" "}
                     Previous
@@ -389,7 +376,10 @@ const DiaryBlog = () => {
                   <button
                     onClick={() => navigateDay("next")}
                     className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 flex items-center"
-                    disabled={selectedDay.id === days[days.length - 1].id}
+                    disabled={
+                      selectedDay.id ===
+                      trainingDays[trainingDays.length - 1].id
+                    }
                   >
                     Next <i className="fas fa-chevron-right ml-1 text-xs"></i>
                   </button>
