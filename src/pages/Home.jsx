@@ -54,7 +54,7 @@ const Home = () => {
                 innovative software solutions and digital services to businesses
                 and individuals. With a focus on Full-Stack Web Development,
                 Artificial Intelligence (AI), and modern cloud-based
-                technologies, Ryaz.io delivers high-quality, scalable, and
+                technologies, Ablore delivers high-quality, scalable, and
                 user-friendly products tailored to meet client requirements.
               </p>
               <p className="text-gray-700 mb-6 leading-relaxed">
@@ -63,7 +63,7 @@ const Home = () => {
                 UI/UX design, API integration, and data-driven analytics. By
                 leveraging cutting-edge frameworks such as Next.js, React, and
                 Tailwind CSS, along with advanced AI tools like Google's
-                Generative AI via Genkit, Ryaz.io ensures that its solutions are
+                Generative AI via Genkit, Ablore ensures that its solutions are
                 not only technically robust but also future-ready.
               </p>
             </div>
