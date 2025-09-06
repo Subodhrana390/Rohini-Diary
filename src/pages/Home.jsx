@@ -280,7 +280,7 @@ const Home = () => {
                     className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                     onClick={() =>
                       window.open(
-                        "https://github.com/Subodhrana390/cropsense",
+                        "https://github.com/Rohinibadyal/cropsense",
                         "_blank"
                       )
                     }
@@ -290,7 +290,7 @@ const Home = () => {
                   <button
                     className="flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition"
                     onClick={() =>
-                      window.open("https://cropsense.vercel.app/", "_blank")
+                      window.open("https://cropsense-iota.vercel.app", "_blank")
                     }
                   >
                     <i className="fas fa-external-link-alt mr-2"></i> Live Demo
