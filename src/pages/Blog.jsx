@@ -12,7 +12,7 @@ const DiaryBlog = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const totalDays = 28;
-  const startDate = new Date(2025, 5, 23);
+  const startDate = new Date(2025, 5, 20);
 
   let validDayCounter = 0;
   const days = Array.from({ length: totalDays }, (_, i) => {
@@ -130,7 +130,7 @@ const DiaryBlog = () => {
             A day-by-day account of my learning experience at Ablore
             <br />
             <span className="text-sm text-blue-600 font-medium">
-              June 23, 2025 - July 21, 2025
+              June 20, 2025 - July 17, 2025
             </span>
           </p>
 
@@ -191,11 +191,11 @@ const DiaryBlog = () => {
             </h3>
             <div className="flex items-center space-x-2 text-sm">
               <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                June 23
+                June 20
               </span>
               <span className="text-gray-400">to</span>
               <span className="px-2 py-1 bg-green-100 text-green-800 rounded">
-                July 21
+                July 17
               </span>
             </div>
           </div>
